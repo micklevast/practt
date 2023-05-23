@@ -1,0 +1,241 @@
+CREATE DATABASE Headquarter;
+USE Headquarter;
+CREATE DATABASE Sales;
+USE Sales;
+
+CREATE TABLE Headqarters (
+    City_id INT PRIMARY KEY,
+    City_name VARCHAR(50),
+    Headquarter_addr VARCHAR(100),
+    State VARCHAR(50),
+    Time DATETIME
+);
+USE Headquarter;
+
+CREATE TABLE Customer (
+    Customer_id INT PRIMARY KEY,
+    Customer_name VARCHAR(50),
+    City_id INT,
+    First_order_date DATE,
+    FOREIGN KEY (City_id) REFERENCES sales.Headqarters(City_id)
+);
+
+CREATE TABLE Walk_in_customers (
+    Customer_id INT PRIMARY KEY,
+    tourism_guide VARCHAR(50),
+    Time DATETIME,
+    FOREIGN KEY (Customer_id) REFERENCES Customer(Customer_id)
+);
+
+CREATE TABLE Mail_order_customers (
+    Customer_id INT PRIMARY KEY,
+    post_address VARCHAR(100),
+    Time DATETIME,
+    FOREIGN KEY (Customer_id) REFERENCES Customer(Customer_id)
+);
+
+USE Sales;
+CREATE TABLE Stores (
+    Store_id INT PRIMARY KEY,
+    City_id INT,
+    Phone VARCHAR(20),
+    Time DATETIME,
+    FOREIGN KEY (City_id) REFERENCES Headqarters(City_id)
+);
+CREATE TABLE Items (
+    Item_id INT PRIMARY KEY,
+    Description VARCHAR(100),
+    Size VARCHAR(20),
+    Weight DECIMAL(10,2),
+    Unit_price DECIMAL(10,2),
+    Time DATETIME
+);
+
+CREATE TABLE Stored_items (
+    Store_id INT,
+    Item_id INT,
+    Quantity_held INT,
+    Time DATETIME,
+    PRIMARY KEY (Store_id, Item_id),
+    FOREIGN KEY (Store_id) REFERENCES Stores(Store_id),
+    FOREIGN KEY (Item_id) REFERENCES Items(Item_id)
+);
+
+CREATE TABLE OrderT (
+    Order_no INT PRIMARY KEY,
+    Order_date DATE,
+    Customer_id INT,
+    FOREIGN KEY (Customer_id) REFERENCES headquarter.Customer(Customer_id)
+);
+
+CREATE TABLE Ordered_item (
+    Order_no INT,
+    Item_id INT,
+    Quantity_ordered INT,
+    Ordered_price DECIMAL(10,2),
+    Time DATETIME,
+    PRIMARY KEY (Order_no, Item_id),
+    FOREIGN KEY (Order_no) REFERENCES OrderT(Order_no),
+    FOREIGN KEY (Item_id) REFERENCES Items(Item_id)
+);
+
+CREATE DATABASE Datawarehouse;
+use Datawarehouse;
+CREATE TABLE Sales_Fact (
+    Store_id INT,
+    Item_id INT,
+    Quantity_held INT,
+    Unit_price DECIMAL(10,2),
+    PRIMARY KEY (Store_id, Item_id),
+    FOREIGN KEY (Store_id) REFERENCES sales.Stores(Store_id),
+    FOREIGN KEY (Item_id) REFERENCES sales.Items(Item_id)
+);
+
+
+CREATE TABLE Store_Dim (
+    Store_id INT PRIMARY KEY,
+    City_id INT,
+    Phone VARCHAR(20),
+    FOREIGN KEY (City_id) REFERENCES sales.Headqarters(City_id)
+);
+
+CREATE TABLE Item_Dim (
+    Item_id INT PRIMARY KEY,
+    Description VARCHAR(100),
+    Size VARCHAR(20),
+    Weight DECIMAL(10,2)
+);
+
+CREATE TABLE City_Dim (
+    City_id INT PRIMARY KEY,
+    City_name VARCHAR(50),
+    State VARCHAR(50)
+);
+Use sales;
+INSERT INTO Headqarters (City_id, City_name, Headquarter_addr, State, Time) VALUES
+(1, 'New York City', '123 Broadway, Suite 500', 'NY', '2022-01-01 00:00:00'),
+(2, 'Los Angeles', '456 Main St, 12th Floor', 'CA', '2022-02-01 00:00:00'),
+(3, 'Chicago', '789 Elm St, Suite 200', 'IL', '2022-03-01 00:00:00');
+
+Use Headquarter;
+INSERT INTO Customer (Customer_id, Customer_name, City_id, First_order_date) VALUES
+(1, 'John Smith', 1, '2022-01-01'),
+(2, 'Mary Johnson', 2, '2022-02-15'),
+(3, 'David Lee', 3, '2022-03-20');
+
+INSERT INTO Walk_in_customers (Customer_id, tourism_guide, Time) VALUES
+(1, 'Tourist Guide A', '2022-01-01 10:00:00'),
+(2, 'Tourist Guide B', '2022-02-15 15:30:00');
+
+INSERT INTO Mail_order_customers (Customer_id, post_address, Time) VALUES
+(3, '123 Main St, Anytown USA', '2022-03-20 09:00:00');
+
+Use sales;
+INSERT INTO Stores (Store_id, City_id, Phone, Time) VALUES
+(1, 1, '555-1234', '2022-01-02 09:00:00'),
+(2, 1, '555-5678', '2022-01-02 09:00:00'),
+(3, 2, '555-9876', '2022-02-15 10:30:00'),
+(4, 3, '555-4321', '2022-03-20 11:45:00');
+
+
+INSERT INTO Items (Item_id, Description, Size, Weight, Unit_price, Time) VALUES
+(1, 'Widget', 'Small', 1.0, 10.00, '2022-01-01 00:00:00'),
+(2, 'Gizmo', 'Large', 2.5, 25.00, '2022-02-01 00:00:00'),
+(3, 'Thingamajig', 'Medium', 0.5, 5.00, '2022-03-01 00:00:00');
+
+
+INSERT INTO Stored_items (Store_id, Item_id, Quantity_held, Time) VALUES
+(1, 1, 100, '2022-01-02 09:00:00'),
+(1, 2, 50, '2022-01-02 09:00:00'),
+(2, 1, 75, '2022-01-02 09:00:00'),
+(3, 2, 100, '2022-02-15 10:30:00'),
+(4, 3, 200, '2022-03-20 11:45:00');
+
+
+INSERT INTO OrderT (Order_no, Order_date, Customer_id) VALUES
+(1001, '2022-02-15', 1),
+(1000,'2022-01-01',2),
+(1002,'2022-03-20',3);
+
+Use sales;
+INSERT INTO Ordered_item (Order_no, Item_id, Quantity_ordered, Ordered_price, Time) VALUES 
+(1000,1,2,20.00,'2022-01-01 10:00:00');
+INSERT INTO Ordered_item (Order_no, Item_id, Quantity_ordered, Ordered_price, Time) VALUES 
+(1001,2,3,75.00,'2022-02-15 15:30:00');
+INSERT INTO Ordered_item (Order_no, Item_id, Quantity_ordered, Ordered_price,Time) VALUES 
+(1002,3,1,5.00,'2022-03-20 09:00:00');
+
+
+use datawarehouse;
+ -- Load data into the dimension tables:
+ INSERT INTO Store_Dim (Store_id, City_id, Phone)
+SELECT DISTINCT Store_id, City_id, Phone
+FROM Sales.Stores;
+
+INSERT INTO Item_Dim (Item_id, Description, Size, Weight)
+SELECT DISTINCT Item_id, Description, Size, Weight
+FROM Sales.Items;
+
+INSERT INTO City_Dim (City_id, City_name, State)
+SELECT DISTINCT City_id, City_name, State
+FROM Sales.Headqarters;
+
+-- Load data into the fact table:
+INSERT INTO Sales_Fact (Store_id, Item_id, Quantity_held, Unit_price)
+SELECT si.Store_id, si.Item_id, si.Quantity_held, i.Unit_price
+FROM Sales.Stored_items si
+JOIN Sales.Items i ON si.Item_id = i.Item_id;
+
+-- 1  
+
+use datawarehouse;
+
+SELECT s.Store_id, c.City_name, c.State, s.Phone, i.Description, i.Size, i.Weight, f.Unit_price
+FROM Sales_Fact f
+JOIN Store_Dim s ON f.Store_id = s.Store_id
+JOIN Item_Dim i ON f.Item_id = i.Item_id
+JOIN City_Dim c ON s.City_id = c.City_id
+WHERE i.Description='Widget';
+
+-- 2
+SELECT o.Order_no, c.Customer_name, o.Order_date
+FROM Sales.OrderT o
+JOIN Headquarter.Customer c ON o.Customer_id = c.Customer_id
+JOIN Sales.Ordered_item oi ON oi.Order_no = o.Order_no
+JOIN Sales.Stored_items si ON si.Item_id=oi.Item_id and si.Store_id=3;
+
+-- 3
+SELECT DISTINCT Stores.Store_id, Headqarters.City_name, Stores.Phone
+FROM Sales.Stores
+INNER JOIN Sales.Headqarters ON Stores.City_id = Headqarters.City_id
+INNER JOIN Sales.Stored_items ON Stores.Store_id = Stored_items.Store_id
+INNER JOIN Sales.Ordered_item ON Stored_items.Item_id = Ordered_item.Item_id
+INNER JOIN Sales.OrderT ON Ordered_item.Order_no = OrderT.Order_no
+INNER JOIN Headquarter.Customer ON OrderT.Customer_id = Customer.Customer_id
+WHERE Customer.Customer_id = 2;
+
+-- 4
+SELECT DISTINCT h.Headquarter_addr, h.City_name, h.State
+FROM Sales.Stored_items si
+JOIN Sales.Stores s ON si.Store_id = s.Store_id
+JOIN Sales.Headqarters h ON s.City_id = h.City_id
+JOIN Sales.Items i ON si.Item_id = i.Item_id
+WHERE si.Quantity_held > 75
+AND i.Description = 'Widget';
+
+-- 5
+SELECT o.Order_no, i.Description, si.Store_id, h.City_name AS Store_City
+FROM Sales.OrderT o
+JOIN Sales.Ordered_item oi ON o.Order_no = oi.Order_no
+JOIN Sales.Items i ON oi.Item_id = i.Item_id
+JOIN Sales.Stored_items si ON oi.Item_id = si.Item_id 
+JOIN Sales.Stores s ON si.Store_id = s.Store_id
+JOIN Sales.Headqarters h ON s.City_id = h.City_id
+WHERE o.Customer_id = 3;
+
+-- 6
+SELECT c.Customer_name, h.City_name, h.State
+FROM Headquarter.Customer c
+JOIN Sales.Headqarters h
+ON c.City_id = h.City_id
+WHERE c.Customer_id = 2;
